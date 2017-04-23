@@ -25,6 +25,10 @@ def array_parse(array_string):
     kv = array_string.split()
     return {'key': kv[0], 'value': kv[1].strip().split(',')}
 
+def single_parse(array_string):
+    kv = array_string.split()
+    return {'key': kv[0], 'value': kv[1].strip()}
+
 
 file = 'psrcat_tar/psrcat.db'
 url = 'http://www.atnf.csiro.au/people/pulsar/psrcat/downloads/psrcat_pkg.tar.gz'
@@ -44,12 +48,15 @@ for rec in get_record(cont):
         if field.startswith('#') or field.startswith('@'):
             continue
         decoded_field = {}
-        if field.startswith('SURVEY') or field.startswith('ASSOC') or field.startswith('TYPE'):
+        if field.startswith('ASSOC') or field.startswith('SURVEY'):
             decoded_field = array_parse(field)
+            rec_dict[decoded_field['key']] = decoded_field['value']
+        elif field.startswith('TYPE'):
+            decoded_field = single_parse(field)
             rec_dict[decoded_field['key']] = decoded_field['value']
         else:
             decoded_field = dict_parse(field)
-            rec_dict[decoded_field['key']] = dict(filter(lambda x: x != 'key', decoded_field.items()))
+            rec_dict[decoded_field['key']] = dict(filter(lambda x: x[0] != 'key', decoded_field.items()))
 
     res.append(rec_dict)
 
